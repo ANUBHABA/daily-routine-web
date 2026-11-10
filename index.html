@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily Routine</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f2;--surface:#fff;--ink:#1c2b29;--muted:#5b6b68;--line:#d5dfdb;--accent:#1f6f6b;--accent-ink:#fff;--sun:#e3a72f;--over:#b4452f;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101817;--surface:#182322;--ink:#e6efec;--muted:#9bb0ab;--line:#2b3b38;--accent:#5fc2bb;--accent-ink:#0b1f1e;--sun:#f0bf55;--over:#ef8a73;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101817;--surface:#182322;--ink:#e6efec;--muted:#9bb0ab;--line:#2b3b38;--accent:#5fc2bb;--accent-ink:#0b1f1e;--sun:#f0bf55;--over:#ef8a73;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+main{max-width:720px;margin:0 auto;padding:20px 18px 64px}
+h1{font-size:clamp(1.9rem,7vw,2.6rem);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+h2{font-size:1.2rem;margin:26px 0 4px}
+.lede,.hint{color:var(--muted);margin:0 0 12px}
+.hint{font-size:.92rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;padding:10px 0;margin-bottom:8px}
+nav button{flex:1;border-radius:999px;font-weight:600}
+nav button[aria-current=page]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button{font:inherit;background:none;border:1.5px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.bar{height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.fill{height:100%;background:var(--accent);transition:width .25s,background .25s}
+.fill.near{background:var(--sun)}.fill.over{background:var(--over)}
+.mtext{display:flex;justify-content:space-between;font-size:.9rem;margin:6px 0 4px;color:var(--muted)}
+.mtext strong{color:var(--ink)}
+.opts{display:grid;gap:8px}
+label.opt{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+label.opt:has(input:checked){border-color:var(--accent)}
+label.opt:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.t{flex:1}.m{color:var(--muted);font-size:.88rem;white-space:nowrap}
+.done .t{text-decoration:line-through;color:var(--muted)}
+.x{padding:2px 9px;border-radius:8px;color:var(--muted)}
+.add{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.add input,.add select{font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px}
+.add input[type=text]{flex:1 1 200px}.add input[type=number]{width:84px}
+.empty{color:var(--muted);padding:14px;border:1.5px dashed var(--line);border-radius:12px}
+.cheer{margin-top:14px;padding:14px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px}
+.stat b{display:block;font-size:2rem;line-height:1.1}
+.week{display:flex;gap:8px;align-items:flex-end;height:150px;margin-top:10px}
+.day{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px;font-size:.82rem;color:var(--muted)}
+.col{width:100%;background:var(--line);border-radius:8px;position:relative;overflow:hidden;flex:1;display:flex;align-items:flex-end}
+.col i{display:block;width:100%;background:var(--accent)}
+.day.today span{color:var(--ink);font-weight:600}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Daily routine</h1>
+<p class="lede">Small habits, 30 minutes or less.</p>
+<nav aria-label="Sections">
+  <button type="button" data-tab="today">Today</button>
+  <button type="button" data-tab="plan">Plan</button>
+  <button type="button" data-tab="progress">Progress</button>
+</nav>
+<div id="view"></div>
+</main>
+
+<script>
+const BASE=[
+ ['m1','Drink a glass of water and open a window',2,'Morning'],['m2','Stretch or move your body',5,'Morning'],['m3','Write your top 3 priorities',3,'Morning'],['m4','Three minutes of slow breathing',3,'Morning'],['m5','Walk outside in daylight',10,'Morning'],
+ ['d1','Step away from screens and look far away',3,'Midday'],['d2','Eat a meal or snack without a screen',10,'Midday'],['d3','Check in: how am I feeling, what do I need?',2,'Midday'],['d4','Short walk or stairs',5,'Midday'],
+ ['e1','Tidy one small area',5,'Evening'],['e2','Write three good things from today',4,'Evening'],['e3','Prepare tomorrow: clothes, bag, first task',5,'Evening'],['e4','Screens off, read or listen to something calm',10,'Evening'],['e5','Gentle stretching before bed',5,'Evening']
+];
+const SLOTS=['Morning','Midday','Evening'],TABS=['today','plan','progress'];
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=ymd(new Date());
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let plan=new Set(),done=new Set(),custom=[],hist={};
+const all=()=>BASE.concat(custom.map(c=>[c.id,c.name,c.min,c.slot]));
+function rd(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}}
+function wr(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function load(){
+ custom=rd('rt2-custom',[]);hist=rd('rt2-hist',{});
+ const ids=new Set(all().map(a=>a[0]));
+ plan=new Set(rd('rt2-plan',[]).filter(i=>ids.has(i)));
+ const d=rd('rt2-done',{});if(d.date===today)done=new Set((d.ids||[]).filter(i=>plan.has(i)));
+}
+function save(){
+ wr('rt2-custom',custom);wr('rt2-plan',[...plan]);wr('rt2-done',{date:today,ids:[...done]});
+ hist[today]={done:done.size,total:plan.size};wr('rt2-hist',hist);
+}
+const mins=ids=>[...ids].reduce((s,id)=>s+(all().find(a=>a[0]===id)||[0,0,0])[2],0);
+function streak(){
+ let n=0,d=new Date();
+ const full=k=>hist[k]&&hist[k].total>0&&hist[k].done>=hist[k].total;
+ if(!full(ymd(d)))d.setDate(d.getDate()-1);
+ while(full(ymd(d))){n++;d.setDate(d.getDate()-1)}
+ return n;
+}
+function meter(){
+ const t=mins(plan),cls=t>30?' over':t>=25?' near':'';
+ const msg=t===0?'Pick your first habit':t<15?'Light. Room for a little more':t<=30?'Good range. Realistic and doable':'Over 30 minutes. Consider dropping one';
+ return `<div class="bar"><div class="fill${cls}" style="width:${Math.min(100,t/30*100)}%"></div></div><div class="mtext"><span><strong>${t}</strong> min planned</span><span>${msg}</span></div>`;
+}
+function vToday(){
+ const items=all().filter(a=>plan.has(a[0])),n=items.filter(a=>done.has(a[0])).length;
+ let h=`<div class="row"><h2 style="margin-top:8px">${new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</h2></div>`;
+ if(!items.length)return h+`<div class="empty">Nothing planned yet. Open the Plan tab and choose a few habits.</div>`;
+ h+=`<div class="bar"><div class="fill" style="width:${n/items.length*100}%"></div></div><div class="mtext"><span><strong>${n}</strong> of ${items.length} done</span><span>${streak()} day streak</span></div><div class="opts">`;
+ SLOTS.forEach(s=>{const g=items.filter(a=>a[3]===s);if(!g.length)return;
+  h+=`<h2>${s}</h2>`+g.map(([id,t,m])=>`<label class="opt ${done.has(id)?'done':''}"><input type="checkbox" data-done="${id}" ${done.has(id)?'checked':''}><span class="t">${esc(t)}</span><span class="m">${m} min</span></label>`).join('')});
+ h+='</div>';
+ if(n===items.length)h+=`<div class="cheer">All done for today. That’s a routine kept.</div>`;
+ return h;
+}
+function vPlan(){
+ let h=meter()+`<p class="hint">Tick the habits you want. Aim for 3 to 5 and 15 to 30 minutes in total.</p>`;
+ SLOTS.forEach(s=>{h+=`<h2>${s}</h2><div class="opts">`+all().filter(a=>a[3]===s).map(([id,t,m])=>{
+  const c=custom.some(x=>x.id===id);
+  return `<label class="opt"><input type="checkbox" data-plan="${id}" ${plan.has(id)?'checked':''}><span class="t">${esc(t)}</span><span class="m">${m} min</span>${c?`<button type="button" class="x" data-del="${id}" aria-label="Delete ${esc(t)}">✕</button>`:''}</label>`}).join('')+'</div>'});
+ h+=`<h2>Add your own habit</h2><div class="add"><input type="text" id="cn" maxlength="60" placeholder="e.g. Call a friend" aria-label="Habit name"><input type="number" id="cm" min="1" max="60" value="5" aria-label="Minutes"><select id="cs" aria-label="Time of day">${SLOTS.map(s=>`<option>${s}</option>`).join('')}</select><button type="button" class="pri" id="ca">Add habit</button></div>
+ <p style="margin-top:22px"><button type="button" id="clr">Clear my plan</button></p>`;
+ return h;
+}
+function vProg(){
+ const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d)}
+ const pct=d=>{const r=hist[ymd(d)];return r&&r.total?Math.round(r.done/r.total*100):0};
+ const hit=days.filter(d=>pct(d)===100).length;
+ return `<div class="stats"><div class="stat"><b>${streak()}</b>day streak</div><div class="stat"><b>${hit}/7</b>days fully done this week</div></div>
+ <h2 style="margin-top:8px">Last 7 days</h2><p class="hint">Share of planned habits completed each day.</p>
+ <div class="week">${days.map(d=>`<div class="day ${ymd(d)===today?'today':''}"><div class="col" title="${pct(d)}%"><i style="height:${pct(d)}%"></i></div><span>${d.toLocaleDateString(undefined,{weekday:'short'})}</span></div>`).join('')}</div>
+ <p class="hint" style="margin-top:16px">Missed a day? Just pick it back up. One skipped day doesn’t undo the habit.</p>`;
+}
+function tab(){const h=location.hash.slice(1);return TABS.includes(h)?h:'today'}
+function render(){
+ const t=tab();
+ document.querySelectorAll('nav button').forEach(b=>{if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+ document.getElementById('view').innerHTML=t==='plan'?vPlan():t==='progress'?vProg():vToday();
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.tab){location.hash=b.dataset.tab;return}
+ if(b.dataset.del){const id=b.dataset.del;custom=custom.filter(c=>c.id!==id);plan.delete(id);done.delete(id);save();render();e.preventDefault();return}
+ if(b.id==='ca'){const n=document.getElementById('cn').value.trim(),m=Math.max(1,Math.min(60,parseInt(document.getElementById('cm').value)||5));
+  if(!n){document.getElementById('cn').focus();return}
+  const id='c'+Date.now();custom.push({id,name:n,min:m,slot:document.getElementById('cs').value});plan.add(id);save();render();return}
+ if(b.id==='clr'){plan.clear();done.clear();save();render()}
+});
+document.addEventListener('change',e=>{
+ const p=e.target.dataset.plan,d=e.target.dataset.done;
+ if(p){e.target.checked?plan.add(p):(plan.delete(p),done.delete(p))}
+ if(d){e.target.checked?done.add(d):done.delete(d)}
+ if(p||d){save();render()}
+});
+window.addEventListener('hashchange',render);
+load();render();
+</script>
+</body>
+</html>
