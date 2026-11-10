@@ -1,0 +1,19 @@
+name: Daily Routine Web
+on:
+    push:
+      branches:
+        - main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        
+            - name: Print Action Status
+              run: echo "Hello! Welcome to GitHub Actions"
+            
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Print Current Date
+              run: date
